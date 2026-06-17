@@ -16,10 +16,15 @@ namespace DesignPatterns.Controllers
         private readonly ILogger<HomeController> _logger;
 
         private readonly IVehicleRepository _vehicleRepository;
+        private readonly IVehicleFactoryCatalog _vehicleFactoryCatalog;
 
-        public HomeController(IVehicleRepository vehicleRepository,ILogger<HomeController> logger)
+        public HomeController(
+            IVehicleRepository vehicleRepository,
+            IVehicleFactoryCatalog vehicleFactoryCatalog,
+            ILogger<HomeController> logger)
         {
             _vehicleRepository = vehicleRepository;
+            _vehicleFactoryCatalog = vehicleFactoryCatalog;
             _logger = logger;
         }
 
@@ -27,6 +32,7 @@ namespace DesignPatterns.Controllers
         {
             var model = new HomeViewModel();
             model.Vehicles = _vehicleRepository.GetVehicles();
+            model.AvailableModels = _vehicleFactoryCatalog.GetAvailableModels();
             string error = Request.Query.ContainsKey("error") ? Request.Query["error"].ToString() : null;
             ViewBag.ErrorMessage = error;
 
@@ -36,21 +42,26 @@ namespace DesignPatterns.Controllers
         [HttpGet]
         public IActionResult AddMustang()
         {
-            _vehicleRepository.AddVehicle(new FordMustangFactory().CreateVehicle());
-            return Redirect("/");
+            return AddVehicle("Mustang");
         }
 
         [HttpGet]
         public IActionResult AddExplorer()
         {
-            _vehicleRepository.AddVehicle(new FordExplorerFactory().CreateVehicle());
-            return Redirect("/");
+            return AddVehicle("Explorer");
         }
 
         [HttpGet]
         public IActionResult AddEscape()
         {
-            _vehicleRepository.AddVehicle(new FordEscapeFactory().CreateVehicle());
+            return AddVehicle("Escape");
+        }
+
+        [HttpGet]
+        public IActionResult AddVehicle(string model)
+        {
+            // The catalog chooses the concrete factory, keeping this controller closed to new vehicle models.
+            _vehicleRepository.AddVehicle(_vehicleFactoryCatalog.CreateVehicle(model));
             return Redirect("/");
         }
 

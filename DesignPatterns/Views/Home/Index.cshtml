@@ -65,7 +65,8 @@
         }
     </table>
 
-    <a href="/Home/AddMustang">Add Mustang</a>
-    <a href="/Home/AddExplorer">Add Explorer</a>
-    <a href="/Home/AddEscape">Add Escape</a>
+    @foreach (var option in Model.AvailableModels)
+    {
+        <a href="/Home/AddVehicle?model=@option.ModelKey">@option.DisplayName</a>
+    }
 </div>
